@@ -37,11 +37,14 @@ jobs:
         run: |
           mkdir -p release-output
           cp app/build/outputs/apk/release/app-release.apk release-output/ProjectRed-${{ github.ref_name }}.apk
+          cp app/build/outputs/apk/release/app-release.apk release-output/app-release.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release-output/ProjectRed-${{ github.ref_name }}.apk
+          files: |
+            release-output/ProjectRed-${{ github.ref_name }}.apk
+            release-output/app-release.apk
           generate_release_notes: true
           draft: false
           prerelease: false
