@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Project Red</string>
+    <string name="app_subtitle">Pemblokir Video Pendek &amp; Anti-Doomscrolling</string>
+
+    <!-- Status Perlindungan -->
+    <string name="status_active_title">Perlindungan Aktif</string>
+    <string name="status_active_desc">Layanan Aksesibilitas berjalan dan memantau video pendek.</string>
+    <string name="status_inactive_title">Perlindungan Belum Aktif</string>
+    <string name="status_inactive_desc">Layanan Aksesibilitas belum diaktifkan pada pengaturan sistem.</string>
+    <string name="btn_open_accessibility">Buka Pengaturan Aksesibilitas</string>
+
+    <!-- Master & Pengaturan -->
+    <string name="master_switch_title">Aktifkan Seluruh Pemblokiran</string>
+    <string name="master_switch_desc">Nyalakan atau hentikan pemblokiran tanpa mematikan layanan aksesibilitas.</string>
+    <string name="section_apps_title">Sasaran Pemblokiran</string>
+    <string name="pref_toast_title">Notifikasi Pemblokiran</string>
+    <string name="pref_toast_desc">Tampilkan pesan singkat saat video pendek berhasil diblokir.</string>
+    <string name="btn_view_diagnostics">Lihat Log Diagnostik Lokal</string>
+
+    <!-- Deskripsi Aksesibilitas untuk Sistem Android -->
+    <string name="accessibility_service_description">Project Red memeriksa struktur antarmuka (UI) dari aplikasi Instagram, Facebook, YouTube, dan TikTok secara real-time untuk mendeteksi serta menghentikan pemutaran video pendek (Reels, Shorts, dan For You feed). Layanan ini bekerja sepenuhnya offline di perangkat Anda, tidak menyimpan isi percakapan atau teks layar, dan tidak pernah mengirim data ke jaringan eksternal.</string>
+
+    <!-- Informasi dan Batasan -->
+    <string name="card_privacy_title">Privasi &amp; Keamanan</string>
+    <string name="card_privacy_body">Aplikasi ini berjalan 100% secara lokal tanpa izin koneksi internet (INTERNET permission). Tidak ada data pengguna, chat, password, atau rekaman layar yang disimpan atau dikirim ke pihak luar.</string>
+
+    <string name="card_limitations_title">Cara Kerja &amp; Batasan Teknis</string>
+    <string name="card_limitations_body">Pemblokiran bekerja dengan mengevaluasi hierarki tampilan UI saat aplikasi dibuka. Fitur percakapan (Direct Message, Messenger, Inbox TikTok), Cerita Instagram (Stories), dan video panjang YouTube dilindungi agar tetap dapat digunakan. Jika berada pada tab Reels atau Shorts, aplikasi secara cerdas mengalihkan tampilan ke Beranda atau Kotak Masuk untuk mencegah siklus macet.</string>
+
+    <!-- Log Diagnostik -->
+    <string name="diagnostic_title">Log Diagnostik Lokal</string>
+    <string name="diagnostic_empty">Belum ada aktivitas pemblokiran yang tercatat.</string>
+    <string name="btn_clear_log">Hapus Log</string>
+    <string name="log_notice">Log ini hanya mencatat package name aplikasi, aturan deteksi yang terpicu, dan waktu kejadian. Tidak ada konten layar atau pesan yang dicatat.</string>
+</resources>

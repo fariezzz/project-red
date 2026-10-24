@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Izin untuk menampilkan notifikasi pemblokiran pada Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Izin untuk umpan balik getaran haptic saat video dicegah -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".ScrollGuardApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_project_red_logo"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_project_red_logo"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ScrollGuard">
+
+        <!-- Activity Utama -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Activity Log Diagnostik -->
+        <activity
+            android:name=".ui.DiagnosticActivity"
+            android:exported="false"
+            android:label="@string/diagnostic_title" />
+
+        <!-- Layanan Aksesibilitas Pemblokir Video Pendek -->
+        <service
+            android:name=".service.ScrollGuardAccessibilityService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <!-- Quick Settings Tile untuk Notification Shade -->
+        <service
+            android:name=".service.ScrollGuardTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_shield_check"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- Receiver untuk Tombol Cepat Notifikasi Permanen -->
+        <receiver
+            android:name=".service.NotificationActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.projectred.scrollguard.ACTION_TOGGLE_MASTER" />
+                <action android:name="com.projectred.scrollguard.ACTION_SNOOZE_15" />
+                <action android:name="com.projectred.scrollguard.ACTION_RESUME" />
+                <action android:name="com.projectred.scrollguard.ACTION_NOTIFICATION_DISMISSED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>
