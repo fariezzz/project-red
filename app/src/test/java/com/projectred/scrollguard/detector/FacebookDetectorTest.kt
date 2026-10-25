@@ -646,4 +646,95 @@ class FacebookDetectorTest {
         val result = detector.evaluate(root)
         assertFalse("Halaman detail postingan Facebook TIDAK boleh diblokir", result.isBlockedSurface)
     }
+
+    @Test
+    fun `test Facebook post detail with multiple images photo collage is NOT blocked`() {
+        // Mensimulasikan PERSIS tangkapan layar kedua pengguna:
+        // Header 'Postingan Paper Rex' dengan tombol panah kembali (<),
+        // timestamp '46 mnt · 🌐', caption 'post-Champions thoughts',
+        // kolase foto wawancara 3 panel vertikal, reaksi '514 suka', '4 komentar', '50 bagikan',
+        // reaksi bawah '6 suka', '1 komentar', dan berikutnya ada 'Orang yang mungkin Anda kenal'.
+        val root = UiNodeSnapshot(
+            className = "com.facebook.litho.ComponentHost",
+            children = listOf(
+                UiNodeSnapshot(
+                    contentDescription = "Kembali",
+                    text = "<",
+                    isClickable = true
+                ),
+                UiNodeSnapshot(
+                    text = "Postingan Paper Rex" // Header spesifik detail postingan
+                ),
+                UiNodeSnapshot(
+                    text = "Paper Rex"
+                ),
+                UiNodeSnapshot(
+                    text = "46 mnt · 🌐"
+                ),
+                UiNodeSnapshot(
+                    text = "post-Champions thoughts"
+                ),
+                UiNodeSnapshot(
+                    text = "I don't know, I mean for now,"
+                ),
+                UiNodeSnapshot(
+                    text = "I don't really want to think about what's in the future."
+                ),
+                UiNodeSnapshot(
+                    contentDescription = "Suka",
+                    text = "514"
+                ),
+                UiNodeSnapshot(
+                    contentDescription = "Komentar",
+                    text = "4"
+                ),
+                UiNodeSnapshot(
+                    contentDescription = "Bagikan",
+                    text = "50"
+                ),
+                UiNodeSnapshot(
+                    contentDescription = "Simpan",
+                    isClickable = true
+                )
+            )
+        )
+
+        val result = detector.evaluate(root, "Postingan Paper Rex")
+        assertFalse("Detail postingan foto atau kolase gambar TIDAK boleh diblokir", result.isBlockedSurface)
+    }
+
+    @Test
+    fun `test Facebook post with photo album badge is NOT blocked`() {
+        // Mensimulasikan postingan dengan banyak foto (badge '+8' di feed seperti gambar pertama pengguna)
+        val root = UiNodeSnapshot(
+            className = "com.facebook.litho.ComponentHost",
+            children = listOf(
+                UiNodeSnapshot(
+                    text = "Paper Rex"
+                ),
+                UiNodeSnapshot(
+                    text = "Ikuti",
+                    isClickable = true
+                ),
+                UiNodeSnapshot(
+                    text = "45 mnt · 🌐"
+                ),
+                UiNodeSnapshot(
+                    text = "+8" // Badge album foto
+                ),
+                UiNodeSnapshot(
+                    text = "Orang yang mungkin Anda kenal"
+                ),
+                UiNodeSnapshot(
+                    contentDescription = "Suka"
+                ),
+                UiNodeSnapshot(
+                    contentDescription = "Komentar"
+                )
+            )
+        )
+
+        val result = detector.evaluate(root)
+        assertFalse("Postingan album/galeri foto tidak boleh diblokir", result.isBlockedSurface)
+    }
 }

@@ -22,7 +22,7 @@ Aplikasi ini beroperasi 100% lokal di perangkat Anda: tanpa pelacakan data, tanp
 | Aplikasi | Package Identifier | Area yang Diblokir | Fitur yang Tetap Aman & Diizinkan |
 | :--- | :--- | :--- | :--- |
 | **Instagram** | `com.instagram.android` | Tab Reels aktif, penampil Reels layar penuh (Clips Viewer) | Direct Messages (DM), Cerita (Stories), Feed Beranda umum, Profil, Pencarian |
-| **Facebook** | `com.facebook.katana`<br>`com.facebook.wakizashi`<br>`com.facebook.lite` | Tab Reels terpilih, penampil video pendek FB Shorts/Reels layar penuh | Messenger, kabar beranda (News Feed), halaman profil orang lain, postingan grup & halaman |
+| **Facebook** | `com.facebook.katana`<br>`com.facebook.wakizashi`<br>`com.facebook.lite` | Tab Reels terpilih, penampil video pendek FB Shorts/Reels layar penuh | Messenger, kabar beranda (News Feed), halaman profil, detail postingan foto/album, postingan grup & halaman |
 | **YouTube** | `com.google.android.youtube`<br>`com.google.android.youtube.tv` | Tab Shorts pada pivot bar, pemutar Shorts vertikal | Pemutaran video biasa (panjang) dengan seek bar, beranda, tab langganan (subscriptions) |
 | **TikTok** | `com.zhiliaoapp.musically`<br>`com.ss.android.ugc.trill`<br>`com.zhiliaoapp.musically.go` | Feed video vertikal Beranda (Untuk Anda / Mengikuti) | Kotak Masuk (Inbox), ruang chat DM, halaman Profil, pencarian, dan tab Teman |
 
@@ -70,7 +70,7 @@ Aplikasi ini beroperasi 100% lokal di perangkat Anda: tanpa pelacakan data, tanp
 
 ## Verifikasi & Pengujian Unit
 
-Proyek ini dilengkapi dengan 57 rangkaian pengujian unit murni yang mencakup seluruh skenario deteksi, batas waktu jeda, perhitungan statistik, jadwal malam, dan pencegahan false-positive:
+Proyek ini dilengkapi dengan 59 rangkaian pengujian unit murni yang mencakup seluruh skenario deteksi, batas waktu jeda, perhitungan statistik, jadwal malam, dan pencegahan false-positive:
 
 ```bash
 # Menjalankan pengujian unit

@@ -10,7 +10,7 @@ import com.projectred.scrollguard.model.UiNodeSnapshot
  * Detektor untuk Facebook Reels (com.facebook.katana, com.facebook.wakizashi, com.facebook.lite).
  * Menargetkan pemutar Reels layar penuh dan tab menu Reels,
  * sembari menjaga linimasa postingan, halaman profil (saat stalking/melihat profil orang lain),
- * detail postingan biasa (post permalink), grup, halaman, dan obrolan Messenger tetap dapat diakses tanpa false-positive.
+ * detail postingan biasa (post permalink), galeri foto/gambar, grup, halaman, dan obrolan Messenger tetap dapat diakses tanpa false-positive.
  */
 class FacebookDetector : AppDetector {
 
@@ -26,10 +26,9 @@ class FacebookDetector : AppDetector {
         }
 
         // 2. FILTER UTAMA PENCEGAH FALSE-POSITIVE: Lindungi Detail Postingan (Post Detail / Permalink)
-        // Menangani saat pengguna mengeklik atau membuka detail postingan yang memuat video/reels
-        // (menampilkan caption, kolom "Komentari sebagai...", reaksi di bawah, dan tombol tutup ✕).
-        // Pengguna baru melihat detail postingan dan BELUM memutar video secara layar penuh.
-        if (isPostDetailScreen(root)) {
+        // Menangani saat pengguna mengeklik atau membuka detail postingan foto, album/kolase gambar, maupun teks biasa.
+        // Contoh: Header bertuliskan "Postingan [Nama]", terdapat tombol panah kembali (<), tombol tutup (✕), dll.
+        if (isPostDetailScreen(root, windowTitle)) {
             return DetectionResult.allowed(
                 reason = "Halaman detail postingan Facebook terdeteksi - pemblokiran diabaikan",
                 targetApp = targetApp
@@ -174,13 +173,26 @@ class FacebookDetector : AppDetector {
 
     /**
      * Memeriksa apakah tampilan saat ini merupakan Halaman Detail Postingan (Post Detail / Permalink).
-     * Contoh: pengguna membuka postingan seseorang untuk membaca caption atau komentar,
-     * yang di dalamnya memuat preview video/reels (seperti tombol play tengah, kolom "Komentari sebagai...", dll.).
-     * Layar ini adalah halaman konten sosial biasa dan TIDAK boleh diblokir.
+     * Contoh:
+     * - Header bertuliskan "Postingan [Nama Halaman/Orang]" (misal: "Postingan Paper Rex", "Postingan Fariez").
+     * - Terdapat input bar komentar postingan: "Komentari sebagai...", "Tulis komentar...", dll.
+     * - Terdapat tombol Tutup (✕) di header bersama dengan timestamp postingan (misal "3 j", "45 mnt", "29 Jun").
+     * - Kolase foto dengan badge jumlah gambar tambahan (misal "+8", "+5", "Foto").
      */
-    private fun isPostDetailScreen(root: UiNodeSnapshot): Boolean {
-        // 1. Terdapat input bar komentar postingan: "Komentari sebagai [Nama]" atau "Tulis komentar..."
-        // Pada pemutar Reels layar penuh, bilah melayang HANYA bertuliskan "Tambahkan komentar" (Add a comment).
+    private fun isPostDetailScreen(root: UiNodeSnapshot, windowTitle: CharSequence? = null): Boolean {
+        // 1. Periksa judul jendela atau header bertuliskan "Postingan [Nama]" (misal: "Postingan Paper Rex")
+        val titleStr = windowTitle?.toString()?.trim()?.lowercase() ?: ""
+        if (titleStr.startsWith("postingan ") || titleStr.endsWith("'s post") || titleStr.contains("post detail")) {
+            return true
+        }
+
+        val hasPostDetailHeader = root.any { node ->
+            val t = (node.text ?: node.contentDescription)?.toString()?.trim()?.lowercase() ?: ""
+            t.startsWith("postingan ") || t.endsWith("'s post")
+        }
+        if (hasPostDetailHeader) return true
+
+        // 2. Terdapat input bar komentar postingan: "Komentari sebagai [Nama]" atau "Tulis komentar..."
         val hasPostCommentInput = root.any { node ->
             val t = (node.text ?: node.contentDescription)?.toString()?.trim()?.lowercase() ?: ""
             t.startsWith("komentari sebagai") || t.startsWith("comment as") ||
@@ -188,7 +200,7 @@ class FacebookDetector : AppDetector {
         }
         if (hasPostCommentInput) return true
 
-        // 2. Terdapat tombol Tutup (✕) di header bersama dengan timestamp postingan (misal "3 j", "12 mnt", "29 Jun")
+        // 3. Terdapat tombol Tutup (✕) di header bersama dengan timestamp postingan (misal "3 j", "45 mnt", "29 Jun")
         val hasCloseButton = root.any { node ->
             val t = (node.text ?: node.contentDescription)?.toString()?.trim() ?: ""
             val id = node.viewIdResourceName?.lowercase() ?: ""
@@ -204,6 +216,13 @@ class FacebookDetector : AppDetector {
                 t.startsWith("disematkan") || t.startsWith("pinned")
         }
         if (hasCloseButton && hasPostTimestamp) return true
+
+        // 4. Kolase foto dengan badge sisa gambar (misal: "+8", "+3", "+5")
+        val hasPhotoAlbumBadge = root.any { node ->
+            val t = (node.text ?: node.contentDescription)?.toString()?.trim() ?: ""
+            t.matches(Regex("^\\+[0-9]+$"))
+        }
+        if (hasPhotoAlbumBadge) return true
 
         return false
     }
@@ -279,6 +298,13 @@ class FacebookDetector : AppDetector {
         val hasNewsFeedLayout = root.hasIdContaining("newsfeed") || root.hasIdContaining("feed_stream")
         if (isHomeTabSelected && !hasTopBackButton(root)) return true
         if (hasNewsFeedLayout && !hasTopBackButton(root)) return true
+
+        // 7. Penanda feed rekomendasi (misal: "Orang yang mungkin Anda kenal")
+        val hasFeedRecommendation = root.any { node ->
+            val t = (node.text ?: node.contentDescription)?.toString()?.trim()?.lowercase() ?: ""
+            t.contains("orang yang mungkin anda kenal") || t.contains("people you may know")
+        }
+        if (hasFeedRecommendation) return true
 
         return false
     }
@@ -454,10 +480,16 @@ class FacebookDetector : AppDetector {
         val hasFollow = hasFollowButton(root)
         val hasUfi = hasReelsUfiRail(root)
         val hasBookmark = hasBookmarkOrSaveButton(root)
+
+        // Trek audio Reels berformat bullet (misal "audio asli" atau "Kreator · Judul")
+        // PENTING: Hanya cocok jika mengandung bullet spasi (" · ") dan diakhiri judul audio,
+        // BUKAN metadata tanggal postingan seperti "45 mnt · 🌐" atau "29 Jun · 👥".
         val hasAudio = root.any { node ->
             val d = (node.contentDescription ?: node.text)?.toString()?.lowercase() ?: ""
-            d.contains("audio asli") || d.contains("original audio") || d.contains("suara asli") ||
-                d.startsWith("audio:") || d.startsWith("musik:") || d.contains(" · ")
+            (d.contains("audio asli") || d.contains("original audio") || d.contains("suara asli") ||
+                d.startsWith("audio:") || d.startsWith("musik:")) ||
+                (d.contains(" · ") && !d.contains(" · 🌐") && !d.contains(" · 👥") && !d.contains(" · 🔒") &&
+                    !d.matches(Regex("^[0-9]+\\s*(j|mnt|dtk|h|m|s|d|hr|min|sec)\\s*·.*$", RegexOption.IGNORE_CASE)))
         }
 
         return when {
